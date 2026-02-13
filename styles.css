@@ -119,6 +119,23 @@ button {
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
+/* Focus Visible Styles for Accessibility */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.theme-toggle:focus-visible,
+.nav-toggle:focus-visible,
+.back-to-top:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* --- Layout --- */
 .container {
     max-width: 1200px;
@@ -806,6 +823,7 @@ button {
 }
 
 @media (max-width: 1024px) { .services-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .services-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .services-grid { grid-template-columns: 1fr; } }
 
 /* --- Listing Cards --- */
@@ -824,7 +842,7 @@ button {
 }
 
 .listing-img {
-    height: 240px;
+    height: 220px;
     background-size: cover;
     background-position: center;
     position: relative;
@@ -909,6 +927,7 @@ button {
 }
 
 @media (max-width: 1024px) { .listings-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .listings-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .listings-grid { grid-template-columns: 1fr; } }
 
 /* --- Area Cards --- */
@@ -994,6 +1013,7 @@ button {
 }
 
 @media (max-width: 1024px) { .areas-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .areas-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .areas-grid { grid-template-columns: 1fr; } }
 
 /* --- Testimonial --- */
@@ -1158,7 +1178,7 @@ button {
 .social-links {
     display: flex;
     gap: 10px;
-    margin-top: 32px;
+    margin-top: 20px;
 }
 
 .social-link {
@@ -1238,6 +1258,13 @@ button {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Form placeholders */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-tertiary);
+    opacity: 0.7;
 }
 
 .form-group select {
@@ -1479,7 +1506,9 @@ button {
 }
 
 @media (max-width: 1024px) { .results-grid { grid-template-columns: repeat(2, 1fr); } .search-filters-row { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px) { .results-grid { grid-template-columns: 1fr; } .search-filters-row { grid-template-columns: repeat(2, 1fr); } .search-main-row { flex-direction: column; } }
+@media (max-width: 768px) { .search-filters-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .results-grid { grid-template-columns: 1fr; } .search-main-row { flex-direction: column; } }
+@media (max-width: 375px) { .search-submit { padding: 12px 20px; font-size: 0.82rem; } }
 
 .search-loading {
     text-align: center;
