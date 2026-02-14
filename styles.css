@@ -2747,26 +2747,27 @@ a.contact-info-value:hover {
 .input-prefix,
 .input-suffix {
     position: absolute;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--text-tertiary);
-    font-weight: 500;
+    font-weight: 600;
     pointer-events: none;
+    z-index: 1;
 }
 
 .input-prefix {
-    left: 16px;
+    left: 18px;
 }
 
 .input-suffix {
-    right: 16px;
+    right: 18px;
 }
 
 .input-with-prefix input {
-    padding-left: 36px;
+    padding-left: 42px !important;
 }
 
 .input-with-suffix input {
-    padding-right: 36px;
+    padding-right: 48px !important;
 }
 
 .input-group input,
