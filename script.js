@@ -401,6 +401,27 @@
     function show(el) { if (el) el.classList.remove('hidden'); }
     function hide(el) { if (el) el.classList.add('hidden'); }
 
+    // ===== SERVICE TABS =====
+    const serviceTabs = document.querySelectorAll('.service-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    serviceTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+
+            // Remove active class from all tabs and contents
+            serviceTabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding content
+            tab.classList.add('active');
+            const targetContent = document.getElementById(`${targetTab}-tab`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+        });
+    });
+
     // ===== SMOOTH SCROLL =====
     document.querySelectorAll('a[href^="#"]').forEach(a => {
         a.addEventListener('click', (e) => {
@@ -415,3 +436,87 @@
     });
 
 })();
+
+// ===== DOWN PAYMENT CALCULATOR =====
+function calculateDownPayment() {
+    const homePrice = parseFloat(document.getElementById('homePrice').value) || 0;
+    const downPaymentPercent = parseFloat(document.getElementById('downPaymentPercent').value) || 0;
+
+    // Calculate down payment based on percentage
+    const downPayment = (homePrice * downPaymentPercent) / 100;
+
+    // Calculate minimum down payment required in Canada
+    let minimumDownPayment = 0;
+    if (homePrice <= 500000) {
+        minimumDownPayment = homePrice * 0.05; // 5% for first $500k
+    } else if (homePrice <= 1000000) {
+        minimumDownPayment = 500000 * 0.05 + (homePrice - 500000) * 0.10; // 5% first $500k, 10% above
+    } else {
+        minimumDownPayment = homePrice * 0.20; // 20% for homes over $1M
+    }
+
+    const mortgageAmount = homePrice - downPayment;
+    const minimumPercent = ((minimumDownPayment / homePrice) * 100).toFixed(2);
+
+    // Display results
+    document.getElementById('downPaymentAmount').textContent = `$${downPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    document.getElementById('minimumDownPayment').textContent = `$${minimumDownPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})} (${minimumPercent}%)`;
+    document.getElementById('mortgageAmount').textContent = `$${mortgageAmount.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+
+    // Add note
+    const noteEl = document.getElementById('downPaymentNote');
+    if (downPayment < minimumDownPayment) {
+        noteEl.innerHTML = `<strong>Note:</strong> Your down payment is below the Canadian minimum requirement. You need at least $${minimumDownPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})} (${minimumPercent}%) for this purchase price.`;
+        noteEl.style.display = 'block';
+    } else {
+        noteEl.innerHTML = `<strong>Great!</strong> Your down payment meets Canadian requirements. ${downPaymentPercent >= 20 ? 'With 20%+ down, you avoid CMHC insurance!' : 'Note: Down payments under 20% require mortgage default insurance (CMHC).'}`;
+        noteEl.style.display = 'block';
+    }
+}
+
+// ===== MORTGAGE CALCULATOR =====
+function calculateMortgage() {
+    const homePrice = parseFloat(document.getElementById('mortHomePrice').value) || 0;
+    const downPayment = parseFloat(document.getElementById('mortDownPayment').value) || 0;
+    const annualRate = parseFloat(document.getElementById('interestRate').value) || 0;
+    const amortizationYears = parseInt(document.getElementById('amortization').value) || 25;
+
+    // Calculate mortgage amount (principal)
+    const principal = homePrice - downPayment;
+
+    // Convert annual rate to monthly rate
+    const monthlyRate = annualRate / 100 / 12;
+
+    // Calculate number of payments
+    const numberOfPayments = amortizationYears * 12;
+
+    // Calculate monthly payment using formula: M = P * [r(1+r)^n] / [(1+r)^n - 1]
+    let monthlyPayment = 0;
+    if (monthlyRate === 0) {
+        monthlyPayment = principal / numberOfPayments;
+    } else {
+        const rPlusOne = 1 + monthlyRate;
+        const rPlusOnePowerN = Math.pow(rPlusOne, numberOfPayments);
+        monthlyPayment = principal * (monthlyRate * rPlusOnePowerN) / (rPlusOnePowerN - 1);
+    }
+
+    // Calculate totals
+    const totalPaid = monthlyPayment * numberOfPayments;
+    const totalInterest = totalPaid - principal;
+
+    // Display results
+    document.getElementById('monthlyPayment').textContent = `$${monthlyPayment.toLocaleString('en-CA', {maximumFractionDigits: 2})}`;
+    document.getElementById('totalMortgage').textContent = `$${principal.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    document.getElementById('totalInterest').textContent = `$${totalInterest.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    document.getElementById('totalPaid').textContent = `$${totalPaid.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+}
+
+// Auto-calculate on page load if on calculators
+window.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('homePrice')) {
+        calculateDownPayment();
+    }
+    if (document.getElementById('mortHomePrice')) {
+        calculateMortgage();
+    }
+});
