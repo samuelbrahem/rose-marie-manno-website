@@ -2864,3 +2864,26 @@ a.contact-info-value:hover {
         min-width: auto;
     }
 }
+
+/* ===== INSTAGRAM FEED ===== */
+.instagram-feed {
+    margin-top: 40px;
+}
+
+.instagram-embed-wrapper {
+    margin-bottom: 32px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-elevated);
+    padding: 20px;
+}
+
+.instagram-cta {
+    text-align: center;
+}
+
+.instagram-cta .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
