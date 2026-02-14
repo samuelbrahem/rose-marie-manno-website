@@ -48,7 +48,7 @@
             <!-- Service Tabs -->
             <div class="service-tabs reveal" style="margin-top: 40px;">
                 <button class="service-tab active" data-tab="services">Services Overview</button>
-                <button class="service-tab" data-tab="downpayment">Down Payment Calculator</button>
+                <button class="service-tab" data-tab="transfertax">BC Transfer Tax Calculator</button>
                 <button class="service-tab" data-tab="mortgage">Mortgage Calculator</button>
             </div>
         </div>
@@ -204,50 +204,72 @@
     </section>
     </div>
 
-    <!-- Down Payment Calculator Tab -->
-    <div class="tab-content" id="downpayment-tab">
+    <!-- BC Transfer Tax Calculator Tab -->
+    <div class="tab-content" id="transfertax-tab">
         <section class="section">
             <div class="container">
                 <div class="calculator-wrapper">
-                    <h2 class="heading-md">Down Payment Calculator</h2>
-                    <p class="body-lg" style="margin-bottom: 32px;">Calculate the minimum down payment required for your home purchase in Canada.</p>
+                    <h2 class="heading-md">BC Property Transfer Tax Calculator</h2>
+                    <p class="body-lg" style="margin-bottom: 32px;">Calculate the Property Transfer Tax required when purchasing property in British Columbia.</p>
 
                     <div class="calculator-grid">
                         <div class="calculator-inputs">
                             <div class="input-group">
-                                <label for="homePrice">Home Purchase Price</label>
+                                <label for="propertyPrice">Property Purchase Price</label>
                                 <div class="input-with-prefix">
                                     <span class="input-prefix">$</span>
-                                    <input type="number" id="homePrice" value="750000" min="0" step="1000">
+                                    <input type="number" id="propertyPrice" value="750000" min="0" step="1000">
                                 </div>
                             </div>
 
-                            <div class="input-group">
-                                <label for="downPaymentPercent">Down Payment Percentage</label>
-                                <div class="input-with-suffix">
-                                    <input type="number" id="downPaymentPercent" value="20" min="0" max="100" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
+                            <div class="input-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="firstTimeBuyer">
+                                    <span>I am a first-time home buyer</span>
+                                </label>
+                                <small>Exemption applies to properties up to $835,000 (partial up to $860,000)</small>
                             </div>
 
-                            <button class="btn btn-primary" onclick="calculateDownPayment()">Calculate</button>
+                            <div class="input-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="foreignBuyer">
+                                    <span>Foreign buyer (additional 2% tax applies)</span>
+                                </label>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="calculateTransferTax()">Calculate</button>
                         </div>
 
                         <div class="calculator-results">
-                            <h3>Results</h3>
+                            <h3>Transfer Tax Breakdown</h3>
                             <div class="result-item">
-                                <span class="result-label">Down Payment Required:</span>
-                                <span class="result-value" id="downPaymentAmount">$0</span>
+                                <span class="result-label">First $200,000 (1%):</span>
+                                <span class="result-value" id="tax1">$0</span>
                             </div>
                             <div class="result-item">
-                                <span class="result-label">Minimum Down Payment (Canada):</span>
-                                <span class="result-value" id="minimumDownPayment">$0</span>
+                                <span class="result-label">$200K - $2M (2%):</span>
+                                <span class="result-value" id="tax2">$0</span>
                             </div>
                             <div class="result-item">
-                                <span class="result-label">Mortgage Amount:</span>
-                                <span class="result-value" id="mortgageAmount">$0</span>
+                                <span class="result-label">$2M - $3M (3%):</span>
+                                <span class="result-value" id="tax3">$0</span>
                             </div>
-                            <div class="result-note" id="downPaymentNote"></div>
+                            <div class="result-item">
+                                <span class="result-label">Over $3M (5%):</span>
+                                <span class="result-value" id="tax4">$0</span>
+                            </div>
+                            <div class="result-item" id="firstTimeBuyerExemptionRow" style="display: none;">
+                                <span class="result-label">First-time buyer exemption:</span>
+                                <span class="result-value" id="exemptionAmount">$0</span>
+                            </div>
+                            <div class="result-item" id="foreignBuyerRow" style="display: none;">
+                                <span class="result-label">Foreign buyer tax (2%):</span>
+                                <span class="result-value" id="foreignTax">$0</span>
+                            </div>
+                            <div class="result-item highlight">
+                                <span class="result-label">Total Transfer Tax:</span>
+                                <span class="result-value large" id="totalTransferTax">$0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -260,8 +282,8 @@
         <section class="section">
             <div class="container">
                 <div class="calculator-wrapper">
-                    <h2 class="heading-md">Mortgage Payment Calculator</h2>
-                    <p class="body-lg" style="margin-bottom: 32px;">Calculate your estimated monthly mortgage payments.</p>
+                    <h2 class="heading-md">Mortgage & Down Payment Calculator</h2>
+                    <p class="body-lg" style="margin-bottom: 32px;">Calculate your down payment requirements and estimated monthly mortgage payments.</p>
 
                     <div class="calculator-grid">
                         <div class="calculator-inputs">
@@ -279,6 +301,7 @@
                                     <span class="input-prefix">$</span>
                                     <input type="number" id="mortDownPayment" value="150000" min="0" step="1000">
                                 </div>
+                                <small id="downPaymentPercentage" style="color: var(--text-tertiary); margin-top: 4px;"></small>
                             </div>
 
                             <div class="input-group">
@@ -304,13 +327,24 @@
                         </div>
 
                         <div class="calculator-results">
-                            <h3>Results</h3>
+                            <h3>Down Payment</h3>
+                            <div class="result-item">
+                                <span class="result-label">Your Down Payment:</span>
+                                <span class="result-value" id="downPaymentDisplay">$0</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Minimum Required (Canada):</span>
+                                <span class="result-value" id="minimumDownPaymentMort">$0</span>
+                            </div>
+                            <div class="result-note" id="downPaymentNoteMort" style="margin-bottom: 24px;"></div>
+
+                            <h3>Monthly Payment</h3>
                             <div class="result-item highlight">
                                 <span class="result-label">Monthly Payment:</span>
                                 <span class="result-value large" id="monthlyPayment">$0</span>
                             </div>
                             <div class="result-item">
-                                <span class="result-label">Total Mortgage Amount:</span>
+                                <span class="result-label">Mortgage Amount:</span>
                                 <span class="result-value" id="totalMortgage">$0</span>
                             </div>
                             <div class="result-item">

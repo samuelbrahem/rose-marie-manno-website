@@ -437,13 +437,95 @@
 
 })();
 
-// ===== DOWN PAYMENT CALCULATOR =====
-function calculateDownPayment() {
-    const homePrice = parseFloat(document.getElementById('homePrice').value) || 0;
-    const downPaymentPercent = parseFloat(document.getElementById('downPaymentPercent').value) || 0;
+// ===== BC TRANSFER TAX CALCULATOR =====
+function calculateTransferTax() {
+    const propertyPrice = parseFloat(document.getElementById('propertyPrice').value) || 0;
+    const isFirstTimeBuyer = document.getElementById('firstTimeBuyer').checked;
+    const isForeignBuyer = document.getElementById('foreignBuyer').checked;
 
-    // Calculate down payment based on percentage
-    const downPayment = (homePrice * downPaymentPercent) / 100;
+    // Calculate base transfer tax based on BC brackets
+    let tax1 = 0, tax2 = 0, tax3 = 0, tax4 = 0;
+
+    if (propertyPrice <= 200000) {
+        tax1 = propertyPrice * 0.01;
+    } else {
+        tax1 = 200000 * 0.01;
+
+        if (propertyPrice <= 2000000) {
+            tax2 = (propertyPrice - 200000) * 0.02;
+        } else {
+            tax2 = (2000000 - 200000) * 0.02;
+
+            if (propertyPrice <= 3000000) {
+                tax3 = (propertyPrice - 2000000) * 0.03;
+            } else {
+                tax3 = (3000000 - 2000000) * 0.03;
+                tax4 = (propertyPrice - 3000000) * 0.05;
+            }
+        }
+    }
+
+    let totalTax = tax1 + tax2 + tax3 + tax4;
+
+    // First-time buyer exemption
+    let exemption = 0;
+    const firstTimeBuyerExemptionRow = document.getElementById('firstTimeBuyerExemptionRow');
+    if (isFirstTimeBuyer) {
+        if (propertyPrice <= 500000) {
+            exemption = totalTax; // Full exemption
+        } else if (propertyPrice <= 835000) {
+            exemption = 8000; // Maximum $8,000 exemption
+        } else if (propertyPrice <= 860000) {
+            // Partial exemption (linear reduction from $8,000 to $0 between $835k and $860k)
+            const reductionRange = 860000 - 835000;
+            const excessAmount = propertyPrice - 835000;
+            exemption = 8000 * (1 - excessAmount / reductionRange);
+        }
+        firstTimeBuyerExemptionRow.style.display = 'flex';
+    } else {
+        firstTimeBuyerExemptionRow.style.display = 'none';
+    }
+
+    totalTax -= exemption;
+
+    // Foreign buyer tax (additional 2%)
+    let foreignTax = 0;
+    const foreignBuyerRow = document.getElementById('foreignBuyerRow');
+    if (isForeignBuyer) {
+        foreignTax = propertyPrice * 0.02;
+        foreignBuyerRow.style.display = 'flex';
+    } else {
+        foreignBuyerRow.style.display = 'none';
+    }
+
+    const grandTotal = totalTax + foreignTax;
+
+    // Display results
+    document.getElementById('tax1').textContent = `$${tax1.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    document.getElementById('tax2').textContent = `$${tax2.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    document.getElementById('tax3').textContent = `$${tax3.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    document.getElementById('tax4').textContent = `$${tax4.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+
+    if (isFirstTimeBuyer) {
+        document.getElementById('exemptionAmount').textContent = `-$${exemption.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    }
+
+    if (isForeignBuyer) {
+        document.getElementById('foreignTax').textContent = `$${foreignTax.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    }
+
+    document.getElementById('totalTransferTax').textContent = `$${grandTotal.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+}
+
+// ===== MORTGAGE CALCULATOR =====
+function calculateMortgage() {
+    const homePrice = parseFloat(document.getElementById('mortHomePrice').value) || 0;
+    const downPayment = parseFloat(document.getElementById('mortDownPayment').value) || 0;
+    const annualRate = parseFloat(document.getElementById('interestRate').value) || 0;
+    const amortizationYears = parseInt(document.getElementById('amortization').value) || 25;
+
+    // Calculate down payment percentage
+    const downPaymentPercent = homePrice > 0 ? ((downPayment / homePrice) * 100).toFixed(2) : 0;
 
     // Calculate minimum down payment required in Canada
     let minimumDownPayment = 0;
@@ -455,31 +537,7 @@ function calculateDownPayment() {
         minimumDownPayment = homePrice * 0.20; // 20% for homes over $1M
     }
 
-    const mortgageAmount = homePrice - downPayment;
-    const minimumPercent = ((minimumDownPayment / homePrice) * 100).toFixed(2);
-
-    // Display results
-    document.getElementById('downPaymentAmount').textContent = `$${downPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
-    document.getElementById('minimumDownPayment').textContent = `$${minimumDownPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})} (${minimumPercent}%)`;
-    document.getElementById('mortgageAmount').textContent = `$${mortgageAmount.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
-
-    // Add note
-    const noteEl = document.getElementById('downPaymentNote');
-    if (downPayment < minimumDownPayment) {
-        noteEl.innerHTML = `<strong>Note:</strong> Your down payment is below the Canadian minimum requirement. You need at least $${minimumDownPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})} (${minimumPercent}%) for this purchase price.`;
-        noteEl.style.display = 'block';
-    } else {
-        noteEl.innerHTML = `<strong>Great!</strong> Your down payment meets Canadian requirements. ${downPaymentPercent >= 20 ? 'With 20%+ down, you avoid CMHC insurance!' : 'Note: Down payments under 20% require mortgage default insurance (CMHC).'}`;
-        noteEl.style.display = 'block';
-    }
-}
-
-// ===== MORTGAGE CALCULATOR =====
-function calculateMortgage() {
-    const homePrice = parseFloat(document.getElementById('mortHomePrice').value) || 0;
-    const downPayment = parseFloat(document.getElementById('mortDownPayment').value) || 0;
-    const annualRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const amortizationYears = parseInt(document.getElementById('amortization').value) || 25;
+    const minimumPercent = homePrice > 0 ? ((minimumDownPayment / homePrice) * 100).toFixed(2) : 0;
 
     // Calculate mortgage amount (principal)
     const principal = homePrice - downPayment;
@@ -504,7 +562,28 @@ function calculateMortgage() {
     const totalPaid = monthlyPayment * numberOfPayments;
     const totalInterest = totalPaid - principal;
 
-    // Display results
+    // Display down payment info
+    document.getElementById('downPaymentDisplay').textContent = `$${downPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
+    document.getElementById('minimumDownPaymentMort').textContent = `$${minimumDownPayment.toLocaleString('en-CA', {maximumFractionDigits: 0})} (${minimumPercent}%)`;
+    document.getElementById('downPaymentPercentage').textContent = `${downPaymentPercent}% of purchase price`;
+
+    // Down payment note
+    const noteEl = document.getElementById('downPaymentNoteMort');
+    if (downPayment < minimumDownPayment) {
+        noteEl.innerHTML = `⚠️ Your down payment is below the Canadian minimum requirement.`;
+        noteEl.style.display = 'block';
+        noteEl.style.color = 'var(--error, #dc2626)';
+    } else if (downPaymentPercent >= 20) {
+        noteEl.innerHTML = `✓ With 20%+ down, you avoid CMHC insurance!`;
+        noteEl.style.display = 'block';
+        noteEl.style.color = 'var(--success, #16a34a)';
+    } else {
+        noteEl.innerHTML = `ℹ️ Down payments under 20% require CMHC insurance.`;
+        noteEl.style.display = 'block';
+        noteEl.style.color = 'var(--text-tertiary)';
+    }
+
+    // Display mortgage results
     document.getElementById('monthlyPayment').textContent = `$${monthlyPayment.toLocaleString('en-CA', {maximumFractionDigits: 2})}`;
     document.getElementById('totalMortgage').textContent = `$${principal.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
     document.getElementById('totalInterest').textContent = `$${totalInterest.toLocaleString('en-CA', {maximumFractionDigits: 0})}`;
@@ -513,8 +592,8 @@ function calculateMortgage() {
 
 // Auto-calculate on page load if on calculators
 window.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('homePrice')) {
-        calculateDownPayment();
+    if (document.getElementById('propertyPrice')) {
+        calculateTransferTax();
     }
     if (document.getElementById('mortHomePrice')) {
         calculateMortgage();
