@@ -570,15 +570,15 @@ function calculateMortgage() {
     // Down payment note
     const noteEl = document.getElementById('downPaymentNoteMort');
     if (downPayment < minimumDownPayment) {
-        noteEl.innerHTML = `⚠️ Your down payment is below the Canadian minimum requirement.`;
+        noteEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Your down payment is below the Canadian minimum requirement.`;
         noteEl.style.display = 'block';
         noteEl.style.color = 'var(--error, #dc2626)';
     } else if (downPaymentPercent >= 20) {
-        noteEl.innerHTML = `✓ With 20%+ down, you avoid CMHC insurance!`;
+        noteEl.innerHTML = `<i class="fas fa-check-circle"></i> With 20%+ down, you avoid CMHC insurance!`;
         noteEl.style.display = 'block';
         noteEl.style.color = 'var(--success, #16a34a)';
     } else {
-        noteEl.innerHTML = `ℹ️ Down payments under 20% require CMHC insurance.`;
+        noteEl.innerHTML = `<i class="fas fa-info-circle"></i> Down payments under 20% require CMHC insurance.`;
         noteEl.style.display = 'block';
         noteEl.style.color = 'var(--text-tertiary)';
     }
